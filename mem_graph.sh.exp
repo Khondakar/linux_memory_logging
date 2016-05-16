@@ -1,0 +1,32 @@
+#!/bin/bash
+#This takes in a ps log file, and makes a graph of used memory for each process
+
+LOG_FILE=$1
+LOG_TEMP_DIR=/tmp/$1_plot
+LOG_EXT=log
+
+rm -r $LOG_TEMP_DIR
+mkdir $LOG_TEMP_DIR
+
+num_lines=$(cat $LOG_FILE | wc -l)
+
+#Get all unique pid's from the file, then loop through and output their mem use
+echo Parsing File...
+while read log_file_line
+do 
+    echo $log_file_line "\n"
+    echo $(awk '{print $5}') "\n"
+    echo $log_file_line | awk '{print $5}' - >>  \
+    $LOG_TEMP_DIR/$(echo $log_file_line | awk '{print $3}').$LOG_EXT
+    echo -ne $num_lines 'left\r'
+    num_lines=$((num_lines-1))
+done<$LOG_FILE
+
+#ps will track lots of threads, so delete entries that are small
+echo Deleting Files...
+find $LOG_TEMP_DIR -name "*.$LOG_EXT" -size -100c -delete
+
+echo Generating Graph...
+export filepath=$LOG_TEMP_DIR
+gnuplot --persist  mem_graph.gp
+#rm -r $LOG_TEMP_DIR

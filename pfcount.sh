@@ -33,5 +33,7 @@ find $LOG_TEMP_DIR -name "*.$LOG_EXT" -size -100c -delete
 
 echo Generating Graph...
 export filepath=$LOG_TEMP_DIR
-gnuplot --persist  mem_graph.gp
-#rm -r $LOG_TEMP_DIR
+#gnuplot --persist  mem_graph.gp
+python pfcount.py $LOG_TEMP_DIR/2.$LOG_EXT &
+sleep 1
+rm -r $LOG_TEMP_DIR
